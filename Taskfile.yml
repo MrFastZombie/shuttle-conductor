@@ -1,0 +1,32 @@
+# https://taskfile.dev
+
+version: '3'
+
+vars:
+  MODNAME: shuttle-conductor
+
+tasks:
+  symlink:
+    platforms: [windows]
+    cmds:
+      # This command creates a symbolic link to the mod in the Factorio mods folder by making CMD launch Powershell to make it launch CMD as an administrator so it can use mklink. Fun.
+      - powershell -Command "Start-Process cmd -Verb RunAs -Argument '/c mklink /D %appdata%\Factorio\Mods\{{.MODNAME}} {{.USER_WORKING_DIR}}\..\{{.MODNAME}}'"
+  unlink:
+    platforms: [windows]
+    dir: '{{.APPDATA}}\Factorio\Mods'
+    cmds:
+      # This command removes the symbolic link. WOOOOO
+      - unlink {{.MODNAME}}
+  debug-folder:
+    platforms: [windows]
+    dir: '{{.APPDATA}}\Factorio'
+    cmds:
+      - mv Mods disabledMods
+      - mkdir -p debugMods
+      - mv debugMods Mods
+  undebug-folder:
+    platforms: [windows]
+    dir: '{{.APPDATA}}\Factorio'
+    cmds:
+      - mv Mods debugMods
+      - mv disabledMods Mods

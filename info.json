@@ -1,0 +1,9 @@
+   {
+     "name": "shuttle-conductor",
+     "version": "1.0.0",
+     "title": "Shuttle Conductor",
+     "author": "MrFastZombie",
+     "factorio_version": "1.1",
+	 "description": "Shuttle transportation with singleplayer and multiplayer in mind.",
+     "dependencies": ["flib >= 0.14.1"]
+   }
