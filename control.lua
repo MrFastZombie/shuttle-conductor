@@ -1,20 +1,19 @@
 --require("__flib__")
-local modGui = require("mod-gui")
+local gui = require("__shuttle-conductor__/gui")
 
-
-local function createGui(player)
-    local screen_element = player.gui.screen
-    if screen_element["shuttle-conductor-frame"] then return end
-    local frame = screen_element.add{type = "frame", name = "shuttle-conductor-frame", caption = {"shuttle-conductor.name"}}
-    frame.style.size = {385, 165}
-    frame.auto_center = true
-    frame.visible = false
-end
 
 local function isShuttle(train)
     local id = train.id
+    local force = train.carriages[1].force_index
+    local surface = train.carriages[1].surface_index
     if not global.data["shuttles"] then return false end --If it doesn't exist, then this is definitely not a shuttle.
-    for _, shuttle in pairs(global.data["shuttles"]) do
+    if not global.data["shuttles"][force] then return false end
+    if not global.data["shuttles"][force][surface] then return false end
+    for i, shuttle in pairs(global.data["shuttles"][force][surface]) do
+        if shuttle.valid == false then 
+            global.data["shuttles"][force][surface][i] = nil
+            break
+        end
         if shuttle.id == id then
             return true
         end
@@ -22,11 +21,18 @@ local function isShuttle(train)
     return false
 end
 
+---Adds a train to the shuttle list.
+---@param train LuaTrain
 local function addShuttle(train)
+    local force = train.carriages[1].force_index
+    local surface = train.carriages[1].surface_index
     if not global.data["shuttles"] then global.data["shuttles"] = {} end
     if(isShuttle(train)) then return end -- We definitely don't want to add the same shuttle twice.
 
-    table.insert(global.data["shuttles"], train)
+    if not global.data["shuttles"][force] then global.data["shuttles"][force] = {} end
+    if not global.data["shuttles"][force][surface] then global.data["shuttles"][force][surface] = {} end
+    --table.insert(global.data["shuttles"][force][surface], train)
+    global.data["shuttles"][force][surface][train.id] = train --I think it's easier if the list index matches the train id.
 end
 
 local function removeShuttle(train)
@@ -76,7 +82,7 @@ local function addDepot(depot)
     local surface = depot.surface_index
     if not global.data["depots"][surface] then global.data["depots"][surface] = {} end
     table.insert(global.data["depots"][surface], depot)
-    log("added depot" .. depot.backer_name)
+    log("added depot " .. depot.backer_name) --TODO: Remove this later.
 end
 
 local function updateDepots()
@@ -107,9 +113,9 @@ script.on_configuration_changed(function() --This will refresh the GUI whenever 
     log("[shuttle-conductor] configuration changed!")
     local players = game.players
     for _, player in pairs(players) do
-        if player.gui.screen["shuttle-conductor-frame"] then player.gui.screen["shuttle-conductor-frame"].destroy() end
+        gui.destroy(player)
         if not global.data["players"][player.index] then global.data["players"][player.index] = {} end --This line probably only needs to exist for debugging.
-        createGui(player)
+        gui.createGui(player)
     end
 
     initData()
@@ -124,7 +130,7 @@ script.on_event(defines.events.on_player_created, function(event) --This initial
     end
 
     if not global.data["players"][player.index] then global.data["players"][player.index] = {} end
-    createGui(player)
+    gui.createGui(player)
 end)
 
 script.on_event(defines.events.on_train_schedule_changed, function(event) --This will handle adding or removing trains from the shuttle network.
@@ -150,14 +156,19 @@ script.on_event(defines.events.on_player_driving_changed_state, function(event) 
         frame.visible = true
         addShuttle(vehicle.train)
         log("train added to shuttleTrains: " .. vehicle.train.id)
+        --gui.createMinimap(vehicle.train, player)
     end
     if vehicle.type == "cargo-wagon" then --THIS IS A DEBUG THAT SHOULD BE DISABLED IN RELEASES. IT LETS ME REFRESH THE GUI MANUALLY.
-        if player.gui.screen["shuttle-conductor-frame"] then player.gui.screen["shuttle-conductor-frame"].destroy() end
-        createGui(player)
+        gui.destroy(player)
+        gui.createGui(player)
         updateStations(player)
     end
 end)
 
 script.on_nth_tick(120, function() --This will track depots and shuttle destruction every two seconds.
     updateDepots()
+end)
+
+script.on_event(defines.events.on_gui_click, function(event)
+    gui.onClick(event)
 end)
