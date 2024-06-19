@@ -2,6 +2,21 @@
 local gui = {}
 local modGui = require("mod-gui")
 
+---Returns the first locomotive found in the train.
+---@param train LuaTrain
+function getLocomotive(train)
+    for _, locomotive in pairs(train.locomotives.front_movers) do
+        if locomotive ~= nil then
+            return locomotive
+        end
+    end
+
+    for _, locomotive in pairs(train.locomotives.back_movers) do
+        if locomotive ~= nil then
+            return locomotive
+        end
+    end
+end
 
 ---Creates the shuttle conductor GUI.
 ---@param player LuaPlayer
@@ -43,16 +58,29 @@ end
 ---@param player LuaPlayer
 function gui.createMinimap(train, player)
     gui.destroyMinimap(player)
+    local locomotive = getLocomotive(train)
+    local stopColor
+    local trainColor
+    local stop = train.path_end_stop
+        if stop == nil or train.path_end_stop.color == nil then stopColor = "red"
+        else stopColor = train.path_end_stop.color.r..","..train.path_end_stop.color.g..","..train.path_end_stop.color.b
+        end
+    if locomotive.color == nil then trainColor = "red"
+    else trainColor = locomotive.color.r..","..locomotive.color.g..","..locomotive.color.b
+    end
+    if not stop then return end
     local screen_element = player.gui.screen
     local flow = screen_element["shuttle-conductor-frame"]["main-vflow"]
     local mapframe = flow.add{type="frame", name="shuttle-conductor-minimap-frame", style="inside_shallow_frame"}
     local mapFlow = mapframe.add{type="flow", name="shuttle-conductor-minimap-flow", direction="vertical"}
         mapFlow.style.vertical_spacing = 0
     local subheader = mapFlow.add{type="frame", name="minimap-subheader", style="subheader_frame"}
-        subheader.add{type="label", name="minimap-subheader-label", caption='Shuttle '..train.id..train.carriages[1].gps_tag..' has been dispatched to placeholder...sdl;kjhflijkrwhjwrehgerowg'}.style.horizontally_stretchable=true
+        local label = subheader.add{type="label", name="minimap-subheader-label", caption='[color='..trainColor..']Shuttle '..train.id..'[/color] has been dispatched to [color='..stopColor..']'..train.schedule.records[train.schedule.current].station.."[/color]"}
+        label.style.width = 324
         subheader.add{type="sprite-button", name="minimap-close", style="close_button", sprite="utility/close_white"} --TODO: Get this to align correctly >:(
         subheader.style.horizontally_stretchable=true
         subheader.style.bottom_padding=0
+        subheader.style.natural_width = 36
     mapframe.style.horizontally_stretchable=true
     mapframe.style.minimal_height = 128
     --local minimap = mapframe.add{type="minimap", name="shuttle-minimap", style="shuttle-conductor-minimap", position=train.carriages[1].position}
