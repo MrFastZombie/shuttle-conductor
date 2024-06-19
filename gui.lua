@@ -20,15 +20,12 @@ function gui.createGui(player)
     controlFlow.add{type="textfield", name="textfield", text="fuck", style="shuttle-conductor-search"}
     controlFlow.add{type="sprite-button", name="shuttle-button", sprite="entity/locomotive"}
     local buttoncontainer = stationFlow.add{type='frame', name="deep-button-container", style="shuttle-conductor-button-container"}
-    local scrollframe = buttoncontainer.add{type="scroll-pane", name="station-scrollframe", style="shuttle-conductor-scroll-frame"}
+    local scrollframe = buttoncontainer.add{type="scroll-pane", name="station-scrollframe", style="shuttle-conductor-scroll-frame", vertical_scroll_policy="always", horizontal_scroll_policy="never"}
     local buttonflow = scrollframe.add{type="flow", name="buttonflow", direction="vertical"}
     --stationFlow.style.horizontally_stretchable = true
     frame.auto_center = true
     frame.visible = false
     gui.getStations(player)
-    --iframe.style.horizontally_stretchable = true
-    --iframe.style.vertically_stretchable = true
-    --frame.style.vertically_stretchable = true
 end
 
 ---Destroys the shuttle conductor GUI so it can be recreated.

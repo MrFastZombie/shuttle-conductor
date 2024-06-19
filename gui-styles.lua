@@ -42,8 +42,11 @@ default["shuttle-conductor-station-button"] = {
     type = "button_style",
     parent = "button",
     horizontally_stretchable = "on",
+    horizontally_squashable = "on",
     left_padding = 16,
-    right_padding = 16
+    right_padding = 16,
+    maximal_width = 337,
+    minimal_width = 317
 }
 
 default["shuttle-conductor-search"] = {
