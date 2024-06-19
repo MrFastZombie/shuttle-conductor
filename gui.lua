@@ -77,7 +77,7 @@ function gui.createMinimap(train, player)
     local subheader = mapFlow.add{type="frame", name="minimap-subheader", style="subheader_frame"}
         local label = subheader.add{type="label", name="minimap-subheader-label", caption='[color='..trainColor..']Shuttle '..train.id..'[/color] has been dispatched to [color='..stopColor..']'..train.schedule.records[train.schedule.current].station.."[/color]"}
         label.style.width = 324
-        subheader.add{type="sprite-button", name="minimap-close", style="close_button", sprite="utility/close_white"} --TODO: Get this to align correctly >:(
+        subheader.add{type="sprite-button", name="minimap-close", style="close_button", sprite="utility/close_white"}
         subheader.style.horizontally_stretchable=true
         subheader.style.bottom_padding=0
         subheader.style.natural_width = 36
