@@ -136,10 +136,20 @@ function gui.onClick(event)
     if(event.element.name:find("station%-button%-")) then
         local stationName = event.element.caption
         log("Player clicked "..event.element.name.."Which leads to "..stationName)
+        if(player.vehicle ~= nil and player.vehicle.type == "locomotive") then
+            local train = player.vehicle.train
+            local schedule = {current = 1, records = {{station=stationName}}}
+            train.schedule = schedule
+            train.manual_mode = false
+            ---@diagnostic disable-next-line: param-type-mismatch
+            gui.createMinimap(train, player)
+        end
+        return
     end
 
     if(event.element.name == "minimap-close") then --Minimap close button
         gui.destroyMinimap(player)
+        return
     end
 
     if(event.element.name == "shuttle-conductor-button") then --ModGUI button
@@ -149,6 +159,7 @@ function gui.onClick(event)
             else if (frame.visible) then frame.visible = false
             else frame.visible = true end
         end
+        return
     end
 end
 
