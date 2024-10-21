@@ -5,10 +5,13 @@ default["shuttle-conductor-main-frame"] = {
     parent = "frame",
     minimal_height=256,
     maximal_height=2048,
-    width = 385,
+    minimal_width=385,
+    maximal_width=770,
+    --width = 385,
+    natural_width = 385,
     natural_height = 256, --Make sure to use natural height when defining stretchaable elements.
     vertically_stretchable = "on",
-    horizontally_stretchable = "off"
+    horizontally_stretchable = "on"
 }
 
 default["shuttle-conductor-main-vflow"] = { --I probably don't need this one anymore
