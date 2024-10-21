@@ -16,17 +16,17 @@ tasks:
     dir: '{{.APPDATA}}\Factorio\Mods'
     cmds:
       # This command removes the symbolic link. WOOOOO
-      - unlink {{.MODNAME}}
+      # (don't remove the CMD part, it will remove the files if you do!)
+      - cmd /c rmdir {{.MODNAME}}
   debug-folder:
     platforms: [windows]
     dir: '{{.APPDATA}}\Factorio'
     cmds:
-      - mv Mods disabledMods
-      - mkdir -p debugMods
-      - mv debugMods Mods
+      - cmd /c ren Mods disabledMods
+      - cmd /c ren debugMods Mods
   undebug-folder:
     platforms: [windows]
     dir: '{{.APPDATA}}\Factorio'
     cmds:
-      - mv Mods debugMods
-      - mv disabledMods Mods
+      - cmd /c ren Mods debugMods
+      - cmd /c ren disabledMods Mods
