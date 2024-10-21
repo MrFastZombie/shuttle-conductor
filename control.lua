@@ -1,25 +1,6 @@
 --require("__flib__")
 local gui = require("__shuttle-conductor__/gui")
-
-
-local function isShuttle(train)
-    local id = train.id
-    local force = train.carriages[1].force_index
-    local surface = train.carriages[1].surface_index
-    if not global.data["shuttles"] then return false end --If it doesn't exist, then this is definitely not a shuttle.
-    if not global.data["shuttles"][force] then return false end
-    if not global.data["shuttles"][force][surface] then return false end
-    for i, shuttle in pairs(global.data["shuttles"][force][surface]) do
-        if shuttle.valid == false then 
-            global.data["shuttles"][force][surface][i] = nil
-            break
-        end
-        if shuttle.id == id then
-            return true
-        end
-    end
-    return false
-end
+local dispatch = require("__shuttle-conductor__/dispatch")
 
 ---Adds a train to the shuttle list.
 ---@param train LuaTrain
@@ -27,7 +8,7 @@ local function addShuttle(train)
     local force = train.carriages[1].force_index
     local surface = train.carriages[1].surface_index
     if not global.data["shuttles"] then global.data["shuttles"] = {} end
-    if(isShuttle(train)) then return end -- We definitely don't want to add the same shuttle twice.
+    if(dispatch.isShuttle(train)) then return end -- We definitely don't want to add the same shuttle twice.
 
     if not global.data["shuttles"][force] then global.data["shuttles"][force] = {} end
     if not global.data["shuttles"][force][surface] then global.data["shuttles"][force][surface] = {} end
@@ -155,6 +136,7 @@ script.on_event(defines.events.on_player_driving_changed_state, function(event) 
     if vehicle.type == "locomotive" then
         frame.visible = true
         addShuttle(vehicle.train)
+        global.data["players"][player.index]["shuttle"] = vehicle.train --Tracking their selected shuttle.
         log("train added to shuttleTrains: " .. vehicle.train.id)
         --gui.createMinimap(vehicle.train, player)
     end
