@@ -1,6 +1,7 @@
 --require("__flib__")
 local gui = require("__shuttle-conductor__/gui")
 local dispatch = require("__shuttle-conductor__/dispatch")
+local datamanager = require("__shuttle-conductor__/data-manager")
 
 ---Adds a train to the shuttle list.
 ---@param train LuaTrain
@@ -78,16 +79,8 @@ local function updateDepots()
     end
 end
 
-local function initData()
-    global.data = global.data or {}
-
-    if not global.data["shuttles"] then global.data["shuttles"] = {} end
-    if not global.data["depots"] then global.data["depots"] = {} end
-    if not global.data["players"] then global.data["players"] = {} end
-end
-
 script.on_init(function()
-    initData()
+    datamanager.initData()
 end)
 
 script.on_configuration_changed(function() --This will refresh the GUI whenever the mod is updated.
@@ -99,7 +92,7 @@ script.on_configuration_changed(function() --This will refresh the GUI whenever 
         gui.createGui(player)
     end
 
-    initData()
+    datamanager.initData()
 end)
 
 script.on_event(defines.events.on_player_created, function(event) --This initializes the UI for every new player.
@@ -126,7 +119,8 @@ script.on_event(defines.events.on_player_driving_changed_state, function(event) 
     local vehicle = player.vehicle
     local frame = player.gui.screen["shuttle-conductor-frame"]
 
-    updateStations(player)
+    --updateStations(player)
+    datamanager.updateStations(player)
 
     if not vehicle then
         frame.visible = false
@@ -143,7 +137,7 @@ script.on_event(defines.events.on_player_driving_changed_state, function(event) 
     if vehicle.type == "cargo-wagon" then --THIS IS A DEBUG THAT SHOULD BE DISABLED IN RELEASES. IT LETS ME REFRESH THE GUI MANUALLY.
         gui.destroy(player)
         gui.createGui(player)
-        updateStations(player)
+        datamanager.updateStations(player)
     end
 end)
 

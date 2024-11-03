@@ -1,5 +1,9 @@
+-- all hope abandon ye who enter here --
+
 --This file contains most of the code that pertains to creating and maintain the UI of this mod.
 local gui = {}
+local dispatch = require("__shuttle-conductor__/dispatch")
+local datamanager = require("__shuttle-conductor__/data-manager")
 local modGui = require("mod-gui")
 
 ---Returns the first locomotive found in the train.
@@ -99,23 +103,17 @@ local function clearStations(player)
     shuttleFlow.add{type="scroll-pane", name="station-scrollframe", style="shuttle-conductor-scroll-frame"}.add{type="flow", name="buttonflow", direction="vertical"}
 end
 
---Updates the station data for the player.
----@param player LuaPlayer
-local function updateStations(player)
-
-    local playerID = player.index
-    local s = player.surface.find_entities_filtered({name = "train-stop", force=player.force})
-
-    if not global.data["players"][player.index]["stations"] then global.data["players"][player.index]["stations"] = {} end
-    global.data["players"][player.index]["stations"] = s
-end
-
 ---Updates the station buttons for the player.
 ---@param player LuaPlayer
-function gui.getStations(player)
-    updateStations(player)
+---@param search string Only creations buttons for stations that match the search value.
+---@param filters table Hides any stations in the filter.
+function gui.getStations(player, search, filters)
+    search = search or ""
+    filters = filters or ""
+    datamanager.updateStations(player)
     clearStations(player)
-    local stations = global.data["players"][player.index]["stations"]
+    --local stations = storage.data["players"][player.index]["stations"]
+    local stations = storage.data["stations"][player.force_index][player.surface_index]
     local stationFlow = player.gui.screen["shuttle-conductor-frame"]["main-vflow"]["shuttle-conductor-iframe"]["station-vflow"]["deep-button-container"]["station-scrollframe"]["buttonflow"]
 
     for i, station in pairs(stations) do
