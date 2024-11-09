@@ -36,7 +36,7 @@ function gui.createGui(player)
     local iframe = mainFlow.add{type = "frame", name = "shuttle-conductor-iframe", style="inside_shallow_frame_with_padding"}
     local stationFlow = iframe.add{type = "flow", name = "station-vflow", direction = "vertical"}
     local controlFlow = stationFlow.add{type="flow", name = "control-hflow", direction="horizontal"}
-    controlFlow.add{type="textfield", name="textfield", text="fuck", style="shuttle-conductor-search"}
+    controlFlow.add{type="textfield", name="shuttle-conductor-textfield", text="", style="shuttle-conductor-search"}
     controlFlow.add{type="sprite-button", name="shuttle-button", sprite="entity/locomotive"}
     local buttoncontainer = stationFlow.add{type='frame', name="deep-button-container", style="shuttle-conductor-button-container"}
     local scrollframe = buttoncontainer.add{type="scroll-pane", name="station-scrollframe", style="shuttle-conductor-scroll-frame", vertical_scroll_policy="always", horizontal_scroll_policy="never"}
@@ -105,11 +105,12 @@ end
 
 ---Updates the station buttons for the player.
 ---@param player LuaPlayer
----@param search string Only creations buttons for stations that match the search value.
+---@param search string Only creates buttons for stations that match the search value.
 ---@param filters table Hides any stations in the filter.
 function gui.getStations(player, search, filters)
+    local addedStations = {}
     search = search or ""
-    filters = filters or ""
+    filters = filters or {}
     datamanager.updateStations(player)
     clearStations(player)
     --local stations = storage.data["players"][player.index]["stations"]
@@ -117,7 +118,13 @@ function gui.getStations(player, search, filters)
     local stationFlow = player.gui.screen["shuttle-conductor-frame"]["main-vflow"]["shuttle-conductor-iframe"]["station-vflow"]["deep-button-container"]["station-scrollframe"]["buttonflow"]
 
     for i, station in pairs(stations) do
-        stationFlow.add{type="button", name="station-button-"..i, caption=station.backer_name, style="shuttle-conductor-station-button"}
+        if not addedStations[station.backer_name] then 
+            if search == "" or string.find(string.lower(station.backer_name), string.lower(search)) then
+                stationFlow.add{type="button", name="station-button-"..i, caption=station.backer_name, style="shuttle-conductor-station-button"}
+                --table.insert(addedStations, station.backer_name)
+                addedStations[station.backer_name] = true --The value here doesn't matter, this just lets us check without another for loop.
+            end
+        end
     end
 end
 
@@ -158,6 +165,22 @@ function gui.onClick(event)
             else frame.visible = true end
         end
         return
+    end
+
+    if(event.element.name == "shuttle-button") then --Shuttle settings button
+        if player.gui.screen["shuttle-conductor-frame"]["picker-vflow"] then
+            gui.destroyShuttlePicker(player)
+        else
+            gui.createShuttlePicker(player)
+        end
+        return
+    end
+end
+
+function gui.onSearch(event)
+    if(event.element.name == "shuttle-conductor-textfield") then
+        local search = event.text
+        gui.getStations(game.get_player(event.player_index), search)
     end
 end
 
