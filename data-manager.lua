@@ -25,4 +25,22 @@ function datamanager.updateStations(player)
     log("Shuttle Conductor: Got stations for player " .. player.name .. " from force " .. player.force.name .. " with id " .. player.force_index .. " on surface " .. player.surface.name .. " with id " .. player.surface.index)
 end
 
+---Returns a list of the shuttles that are assigned to a particular depot.
+---@param player LuaPlayer
+---@param depotName string
+---@return table {} A table containing shuttles assigned to the depot, or empty if none are found.
+function datamanager.getShuttles(player, depotName)
+    local stops = player.surface.find_entities_filtered({name = "train-stop", force=player.force})
+    local depot = nil
+    for _,v in pairs(stops) do 
+        if v.backer_name == depotName then
+            depot = v
+            break
+        end
+    end --end for
+
+    if depot == nil then return {} end
+    return depot.get_train_stop_trains()
+end
+
 return datamanager
