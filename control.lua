@@ -151,11 +151,28 @@ script.on_event(defines.events.on_player_driving_changed_state, function(event) 
 end)
 
 script.on_nth_tick(120, function() --This will track depots and shuttle destruction every two seconds.
-    updateDepots()
+    --updateDepots()
 end)
 
 script.on_event(defines.events.on_gui_click, function(event)
     gui.onClick(event)
+end)
+
+script.on_event(defines.events.on_gui_text_changed, function(event)
+    if event.element.name == "shuttle-conductor-textfield" then
+        gui.onSearch(event)
+    end
+end)
+
+script.on_event(defines.events.on_runtime_mod_setting_changed, function (event)
+end)
+
+script.on_event(defines.events.on_train_changed_state, function (event)
+    if event.train.state == defines.train_state.wait_station then
+        log("train changed state!")
+    end
+end)
+
 script.on_event("shuttle-conductor-summon", function(event)
     if event.selected_prototype then
         local player = game.get_player(event.player_index)
