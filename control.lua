@@ -147,4 +147,39 @@ end)
 
 script.on_event(defines.events.on_gui_click, function(event)
     gui.onClick(event)
+script.on_event("shuttle-conductor-summon", function(event)
+    if event.selected_prototype then
+        local player = game.get_player(event.player_index)
+        local trainColor = nil
+        local rail = nil
+        if(player == nil) then return end
+
+        if string.find(event.selected_prototype.name, "locomotive") then
+            local locomotive = player.selected
+            if locomotive == nil then return end
+            local train = locomotive.train
+            if train == nil then return end
+            if locomotive.color == nil then trainColor = "red"
+            else trainColor = locomotive.color.r..","..locomotive.color.g..","..locomotive.color.b end
+            if dispatch.isShuttle(train) then
+                dispatch.returnToDepot(train)
+                player.create_local_flying_text({text={"shuttle-conductor.summon-return", trainColor, train.id}, position={event.cursor_position.x, event.cursor_position.y}})
+            else
+                player.create_local_flying_text({text={"shuttle-conductor.dispatch-not-shuttle"}, position={event.cursor_position.x, event.cursor_position.y}})
+            end
+            return
+        end
+        if string.find(event.selected_prototype.name, "support") then return end
+        if string.find(event.selected_prototype.name, "rail") and not string.find(event.selected_prototype.name, "railgun") and not string.find(event.selected_prototype.name, "signal") then
+            rail = player.selected
+        end
+        if rail == nil then return end
+        local train = storage.data["players"][player.index]["shuttle"]
+        if(train == nil) then return end
+        local locomotive = datamanager.getLocomotive(train)
+        if locomotive.color == nil then trainColor = "red"
+        else trainColor = locomotive.color.r..","..locomotive.color.g..","..locomotive.color.b end
+        dispatch.sendToRail(train, rail, player)
+        player.create_local_flying_text({text={"shuttle-conductor.summon-success", trainColor, train.id}, position={event.cursor_position.x, event.cursor_position.y}})
+    end
 end)

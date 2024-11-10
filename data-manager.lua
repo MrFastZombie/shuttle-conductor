@@ -43,4 +43,20 @@ function datamanager.getShuttles(player, depotName)
     return depot.get_train_stop_trains()
 end
 
+---Returns the first locomotive found in the train.
+---@param train LuaTrain
+function datamanager.getLocomotive(train)
+    for _, locomotive in pairs(train.locomotives.front_movers) do
+        if locomotive ~= nil then
+            return locomotive
+        end
+    end
+
+    for _, locomotive in pairs(train.locomotives.back_movers) do
+        if locomotive ~= nil then
+            return locomotive
+        end
+    end
+end
+
 return datamanager

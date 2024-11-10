@@ -6,22 +6,6 @@ local dispatch = require("__shuttle-conductor__/dispatch")
 local datamanager = require("__shuttle-conductor__/data-manager")
 local modGui = require("mod-gui")
 
----Returns the first locomotive found in the train.
----@param train LuaTrain
-function getLocomotive(train)
-    for _, locomotive in pairs(train.locomotives.front_movers) do
-        if locomotive ~= nil then
-            return locomotive
-        end
-    end
-
-    for _, locomotive in pairs(train.locomotives.back_movers) do
-        if locomotive ~= nil then
-            return locomotive
-        end
-    end
-end
-
 ---Creates the shuttle conductor GUI.
 ---@param player LuaPlayer
 function gui.createGui(player)
@@ -62,7 +46,7 @@ end
 ---@param player LuaPlayer
 function gui.createMinimap(train, player)
     gui.destroyMinimap(player)
-    local locomotive = getLocomotive(train)
+    local locomotive = datamanager.getLocomotive(train)
     local stopColor
     local trainColor
     local stop = train.path_end_stop
