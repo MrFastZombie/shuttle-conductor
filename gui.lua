@@ -73,7 +73,7 @@ function gui.createMinimap(train, player)
     mapframe.style.minimal_height = 128
     --local minimap = mapframe.add{type="minimap", name="shuttle-minimap", style="shuttle-conductor-minimap", position=train.carriages[1].position}
     local minimap = mapFlow.add{type="minimap", name="shuttle-minimap", style="shuttle-conductor-minimap", position=train.carriages[1].position}
-    minimap.zoom=1.5
+    minimap.zoom=50
     minimap.entity = train.carriages[1]
 end
 

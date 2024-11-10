@@ -3,7 +3,7 @@
      "version": "1.0.0",
      "title": "Shuttle Conductor",
      "author": "MrFastZombie",
-     "factorio_version": "1.1",
+     "factorio_version": "2.0",
 	   "description": "Advanced shuttle transportation with singleplayer and multiplayer in mind. This mod adds a shuttle train menu that can be used to call a shuttle to a train stop, with the ability to control which shuttles respond.",
      "dependencies": ["flib >= 0.14.1", "? VehicleWagon2"]
    }
