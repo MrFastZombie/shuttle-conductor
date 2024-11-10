@@ -87,6 +87,28 @@ local function clearStations(player)
     shuttleFlow.add{type="scroll-pane", name="station-scrollframe", style="shuttle-conductor-scroll-frame"}.add{type="flow", name="buttonflow", direction="vertical"}
 end
 
+--From https://gist.github.com/akornatskyy/63100a3e6a971fd13456b6db104fb65b
+local function split_with_comma(str)
+    local fields = {}
+    for field in str:gmatch('([^,]+)') do
+      fields[#fields+1] = field
+    end
+    return fields
+ end
+
+local function isFiltered(name)
+    local depots = settings.global["shuttle-conductor-depots"].value
+    local filterStrings = settings.global["shuttle-conductor-filter"].value
+    local list = split_with_comma(filterStrings)
+    local filtered = false
+    for i, v in ipairs(list) do
+        if string.find(name, v) ~= nil then
+            filtered = true
+        end
+    end
+    return filtered
+end
+
 ---Updates the station buttons for the player.
 ---@param player LuaPlayer
 ---@param search string Only creates buttons for stations that match the search value.
@@ -102,11 +124,13 @@ function gui.getStations(player, search, filters)
     local stationFlow = player.gui.screen["shuttle-conductor-frame"]["main-vflow"]["shuttle-conductor-iframe"]["station-vflow"]["deep-button-container"]["station-scrollframe"]["buttonflow"]
 
     for i, station in pairs(stations) do
-        if not addedStations[station.backer_name] then 
+        if not addedStations[station.backer_name] then
             if search == "" or string.find(string.lower(station.backer_name), string.lower(search)) then
-                stationFlow.add{type="button", name="station-button-"..i, caption=station.backer_name, style="shuttle-conductor-station-button"}
-                --table.insert(addedStations, station.backer_name)
-                addedStations[station.backer_name] = true --The value here doesn't matter, this just lets us check without another for loop.
+                if not isFiltered(string.lower(station.backer_name)) then
+                    stationFlow.add{type="button", name="station-button-"..i, caption=station.backer_name, style="shuttle-conductor-station-button"}
+                    --table.insert(addedStations, station.backer_name)
+                    addedStations[station.backer_name] = true --The value here doesn't matter, this just lets us check without another for loop.
+                end
             end
         end
     end
