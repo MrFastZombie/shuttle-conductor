@@ -71,3 +71,13 @@ default ["shuttle-conductor-minimap"] = {
     horizontal_align="center",
     horizontally_stretchable ="on",
 }
+
+default["shuttle-conductor-shuttle-cam"] = {
+    type="camera_style",
+    parent="camera",
+    height = 128,
+    minimal_height = 128,
+    maximal_width = 1024,
+    horizontal_align = "center",
+    horizontally_stretchable = "on"
+}

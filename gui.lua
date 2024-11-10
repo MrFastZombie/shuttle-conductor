@@ -18,6 +18,7 @@ function gui.createGui(player)
     local frame = screen_element.add{type = "frame", name = "shuttle-conductor-frame", caption = {'shuttle-conductor.name'}, style="shuttle-conductor-main-frame"}
     local mainFlow = frame.add{type = "flow", name = "main-vflow", direction = "vertical", style="shuttle-conductor-main-vflow"}
     local iframe = mainFlow.add{type = "frame", name = "shuttle-conductor-iframe", style="inside_shallow_frame_with_padding"}
+          iframe.style.width = 361
     local stationFlow = iframe.add{type = "flow", name = "station-vflow", direction = "vertical"}
     local controlFlow = stationFlow.add{type="flow", name = "control-hflow", direction="horizontal"}
     controlFlow.add{type="textfield", name="shuttle-conductor-textfield", text="", style="shuttle-conductor-search"}
@@ -35,6 +36,97 @@ end
 ---@param player LuaPlayer
 function gui.destroy(player)
     if player.gui.screen["shuttle-conductor-frame"] then player.gui.screen["shuttle-conductor-frame"].destroy() end
+end
+
+---Closes the shuttle picker menu for the player.
+---@param player LuaPlayer The player to close the menu for.
+function gui.destroyShuttlePicker(player)
+    if player.gui.screen["shuttle-conductor-frame"]["picker-vflow"] then player.gui.screen["shuttle-conductor-frame"]["picker-vflow"].destroy() end
+end
+
+---Closes the shuttle select menu for the player so that a new one can be created.
+---@param player any
+function gui.destroy_shuttleSelectMenu(player)
+end
+
+---Selects which shuttle picker to use.
+---@param player LuaPlayer
+---@param menu any
+function gui.shuttleSelectMenu(player, menu)
+    gui.destroy_shuttleSelectMenu(player)
+end
+
+---Creates the shuttle picker menu for the player.
+---@param player LuaPlayer The player to open the menu for.
+function gui.createShuttlePicker(player)
+    gui.destroyShuttlePicker(player)
+    if player.gui.screen["shuttle-conductor-frame"] then
+        local frame = player.gui.screen["shuttle-conductor-frame"]
+        local pickerFlow = frame.add{type = "flow", name = "picker-vflow", direction = "vertical", style="shuttle-conductor-main-vflow"}
+        local settingsFrame = pickerFlow.add{type = "frame", name = "settings-frame", style="inside_shallow_frame_with_padding"}
+              settingsFrame.style.horizontally_stretchable = false
+              settingsFrame.style.width = 360
+        local settingsVFlow = settingsFrame.add{type = "flow", name = "settings-vflow", direction = "vertical"}
+        local menuLabel = settingsVFlow.add{type = "label", name = "menu-label", caption = "Selection Type:"}
+        local menuSelector = settingsVFlow.add{type = "drop-down", name = "menu-selector", items={{'shuttle-conductor.menu1'}, {'shuttle-conductor.menu2'}, {'shuttle-conductor.menu3'}}, selected_index = 1}
+              menuSelector.style.natural_width = 100
+              menuSelector.style.horizontally_stretchable = true
+        local depotCheckbox = settingsVFlow.add{type = "checkbox", name = "depot-checkbox", caption = {'shuttle-conductor.return2depot'}, state = true}
+        local vehicleCheckbox = settingsVFlow.add{type = "checkbox", name = "vehicle-checkbox", caption = {'shuttle-conductor.wagons'}, state = true}
+        local pickerFrame = pickerFlow.add{type = "frame", name = "picker-frame", style="inside_shallow_frame"}
+              pickerFrame.style.horizontally_stretchable = false
+              pickerFrame.style.width = 360
+              pickerFrame.style.vertically_stretchable = true
+        local pickerContainer = pickerFrame.add{type = "frame", name = "pickerDeepFrame", style="shuttle-conductor-button-container"}
+        local listPane = pickerContainer.add{type = "scroll-pane", name = "list-pane", style = "shuttle-conductor-scroll-frame", vertical_scroll_policy = "always", horizontal_scroll_policy = "never"}
+              listPane.style.minimal_width = 360
+              listPane.style.vertically_squashable = true
+              listPane.style.vertically_stretchable = true
+              listPane.style.maximal_height = 443
+        local train = storage.data["players"][player.index]["shuttle"]
+        gui.createShuttleView(player, train)
+    end
+end
+
+---Creates an entry for a shuttle in the shuttle picker list.
+---@param player LuaPlayer
+---@param train LuaTrain
+function gui.createShuttleEntry(player, train)
+    if player.gui.screen["shuttle-conductor-frame"] then 
+        local frame = player.gui.screen["shuttle-conductor-frame"]["picker-vflow"]["picker-frame"]["pickerDeepFrame"]["list-pane"]
+        local entryFlow = frame.add{type="flow", direction="horizontal"}
+        local camera = entryFlow.add{type="camera", position=train.carriages[1].position, style="shuttle-conductor-shuttle-cam"}
+              camera.entity=train.carriages[1]
+              camera.zoom = 0.2
+    end
+end
+
+function gui.destroyShuttleView(player)
+    if player.gui.screen["shuttle-conductor-frame"]["picker-vflow"]["shuttle-conductor-shuttleview-frame"] then player.gui.screen["shuttle-conductor-frame"]["picker-vflow"]["shuttle-conductor-shuttleview-frame"].destroy() end
+end
+
+---Creates a camera view of the selected shuttle under the shuttle picker.
+---@param player LuaPlayer
+---@param train LuaTrain
+function gui.createShuttleView(player, train)
+    gui.destroyShuttleView(player)
+    local pickerFlow = player.gui.screen["shuttle-conductor-frame"]["picker-vflow"]
+    local shuttleViewFrame = pickerFlow.add{type="frame", name="shuttle-conductor-shuttleview-frame", style="inside_shallow_frame"}
+          shuttleViewFrame.style.horizontally_stretchable = true
+          shuttleViewFrame.style.minimal_height = 128
+    local shuttleViewFlow = shuttleViewFrame.add{type="flow", name="shuttle-conductor-shuttleview-flow", direction="vertical"}
+          shuttleViewFlow.style.vertical_spacing = 0
+    local subheader = shuttleViewFlow.add{type="frame", name="shuttleview-subheader", style="subheader_frame"}
+          local label = subheader.add{type="label", name="shuttleview-subheader-label", caption="Selected Shuttle"}
+          label.style.width = 324
+          label.style.maximal_width=324
+          label.style.horizontally_stretchable = true
+          subheader.style.horizontally_stretchable = true
+          subheader.style.width = 360
+          subheader.style.bottom_padding = 0
+    local camera = shuttleViewFlow.add{type="camera", name="shuttle-conductor-shuttle-camera", style="shuttle-conductor-shuttle-cam", position=train.carriages[1].position}
+          camera.zoom = 0.2
+          camera.entity=train.carriages[1]
 end
 
 function gui.destroyMinimap(player)
@@ -63,9 +155,10 @@ function gui.createMinimap(train, player)
     local mapFlow = mapframe.add{type="flow", name="shuttle-conductor-minimap-flow", direction="vertical"}
         mapFlow.style.vertical_spacing = 0
     local subheader = mapFlow.add{type="frame", name="minimap-subheader", style="subheader_frame"}
-        local label = subheader.add{type="label", name="minimap-subheader-label", caption='[color='..trainColor..']Shuttle '..train.id..'[/color] has been dispatched to [color='..stopColor..']'..train.schedule.records[train.schedule.current].station.."[/color]"}
-        label.style.width = 324
-        subheader.add{type="sprite-button", name="minimap-close", style="close_button", sprite="utility/close_white"}
+        local label = subheader.add{type="label", name="minimap-subheader-label", caption={"shuttle-conductor.dispatch-success", trainColor, train.id, stopColor, train.schedule.records[train.schedule.current].station}}
+        label.style.width = 296 --1 button = 324, subtract 28 per extra button
+        subheader.add{type="sprite-button", name="minimap-undo", style="close_button", sprite="utility/reset_white", tooltip="Cancel & return to depot"}
+        subheader.add{type="sprite-button", name="minimap-close", style="close_button", sprite="utility/close", tooltip="Close minimap"}
         subheader.style.horizontally_stretchable=true
         subheader.style.bottom_padding=0
         subheader.style.natural_width = 36
@@ -149,20 +242,23 @@ function gui.onClick(event)
     if(event.element.name:find("station%-button%-")) then
         local stationName = event.element.caption
         log("Player clicked "..event.element.name.."Which leads to "..stationName)
-        if(player.vehicle ~= nil and player.vehicle.type == "locomotive") then
-            local train = player.vehicle.train
-            local schedule = {current = 1, records = {{station=stationName}}}
-            train.schedule = schedule
-            train.manual_mode = false
-            ---@diagnostic disable-next-line: param-type-mismatch
-            gui.createMinimap(train, player)
-        end
+        local train = storage.data["players"][player.index]["shuttle"]
+        if(train == nil) then return end
+        ---@diagnostic disable-next-line: param-type-mismatch
+        dispatch.send(train, stationName)
+        ---@diagnostic disable-next-line: param-type-mismatch
+        gui.createMinimap(train, player)
         return
     end
 
     if(event.element.name == "minimap-close") then --Minimap close button
         gui.destroyMinimap(player)
         return
+    end
+
+    if(event.element.name == "minimap-undo") then 
+        local train = storage.data["players"][player.index]["shuttle"]
+        dispatch.returnToDepot(train)
     end
 
     if(event.element.name == "shuttle-conductor-button") then --ModGUI button
