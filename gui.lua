@@ -261,9 +261,11 @@ function gui.onClick(event)
         return
     end
 
-    if(event.element.name == "minimap-undo") then 
+    if(event.element.name == "minimap-undo") then
         local train = storage.data["players"][player.index]["shuttle"]
         dispatch.returnToDepot(train)
+        gui.createMinimap(train, player, true)
+        return
     end
 
     if(event.element.name == "shuttle-conductor-button") then --ModGUI button
