@@ -59,4 +59,19 @@ function datamanager.getLocomotive(train)
     end
 end
 
+---Sets the currently selected shuttle for a player.
+---@param player LuaPlayer
+---@param train LuaTrain
+function datamanager.setShuttle(player, train)
+    storage.data["players"][player.index]["shuttle"] = train
+end
+
+---Gets the currently selected shuttle for a player.
+---@param player LuaPlayer
+---@return LuaTrain|nil value LuaTrain if found, or nil if not found.
+function datamanager.getShuttle(player)
+    if storage.data["players"][player.index]["shuttle"] == nil then return nil end
+    return storage.data["players"][player.index]["shuttle"]
+end
+
 return datamanager
