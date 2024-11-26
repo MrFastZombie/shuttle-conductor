@@ -136,7 +136,8 @@ end
 ---Creates a minimap for a shuttle on the polyer's shuttletrain GUI.
 ---@param train LuaTrain
 ---@param player LuaPlayer
-function gui.createMinimap(train, player)
+function gui.createMinimap(train, player, depot)
+    if depot == nil then depot = false end
     gui.destroyMinimap(player)
     local locomotive = datamanager.getLocomotive(train)
     local stopColor
@@ -155,12 +156,16 @@ function gui.createMinimap(train, player)
     local mapFlow = mapframe.add{type="flow", name="shuttle-conductor-minimap-flow", direction="vertical"}
         mapFlow.style.vertical_spacing = 0
     local subheader = mapFlow.add{type="frame", name="minimap-subheader", style="subheader_frame"}
-        local label = subheader.add{type="label", name="minimap-subheader-label", caption={"shuttle-conductor.dispatch-success", trainColor, train.id, stopColor, train.schedule.records[train.schedule.current].station}}
-        label.style.width = 296 --1 button = 324, subtract 28 per extra button
-        subheader.add{type="sprite-button", name="minimap-undo", style="close_button", sprite="utility/reset_white", tooltip="Cancel & return to depot"}
-        subheader.add{type="sprite-button", name="minimap-close", style="close_button", sprite="utility/close", tooltip="Close minimap"}
-        subheader.style.horizontally_stretchable=true
-        subheader.style.bottom_padding=0
+        local label = subheader.add{type="label", name="minimap-suder-label", caption={"shuttle-conductor.dispatch-success", trainColor, train.id, stopColor, train.schedule.records[train.schedule.current].station}}
+              label.style.natural_width = 296
+              label.style.horizontally_squashable = true
+        local buttonflow = subheader.add{type = "flow", name = "minimap-button-flow", direction="horizontal"}
+            buttonflow.style.horizontal_align = "right"
+            buttonflow.style.horizontally_stretchable = true
+            if depot == false then buttonflow.add{type="sprite-button", name="minimap-undo", style="close_button", sprite="utility/reset_white", tooltip="Cancel & return to depot"} end
+            buttonflow.add{type="sprite-button", name="minimap-close", style="close_button", sprite="utility/close", tooltip="Close minimap"}
+        subheader.style.horizontally_stretchable = true
+        subheader.style.bottom_padding = 0
         subheader.style.natural_width = 36
     mapframe.style.horizontally_stretchable=true
     mapframe.style.minimal_height = 128
