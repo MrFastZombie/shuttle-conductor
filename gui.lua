@@ -83,7 +83,7 @@ function gui.createShuttlePicker(player)
               listPane.style.vertically_squashable = true
               listPane.style.vertically_stretchable = true
               listPane.style.maximal_height = 443
-        local train = storage.data["players"][player.index]["shuttle"]
+        local train = datamanager.getShuttle(player)
         gui.createShuttleView(player, train)
     end
 end
@@ -247,7 +247,7 @@ function gui.onClick(event)
     if(event.element.name:find("station%-button%-")) then
         local stationName = event.element.caption
         log("Player clicked "..event.element.name.."Which leads to "..stationName)
-        local train = storage.data["players"][player.index]["shuttle"]
+        local train = datamanager.getShuttle(player)
         if(train == nil) then return end
         ---@diagnostic disable-next-line: param-type-mismatch
         dispatch.send(train, stationName)
@@ -262,7 +262,8 @@ function gui.onClick(event)
     end
 
     if(event.element.name == "minimap-undo") then
-        local train = storage.data["players"][player.index]["shuttle"]
+        local train = datamanager.getShuttle(player)
+        if train == nil then return end
         dispatch.returnToDepot(train)
         gui.createMinimap(train, player, true)
         return

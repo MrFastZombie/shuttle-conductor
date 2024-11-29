@@ -173,6 +173,8 @@ script.on_event(defines.events.on_train_changed_state, function (event)
     end
 end)
 
+script.on_event(defines.events.on_gui_)
+
 script.on_event("shuttle-conductor-summon", function(event)
     if event.selected_prototype then
         local player = game.get_player(event.player_index)
@@ -200,7 +202,7 @@ script.on_event("shuttle-conductor-summon", function(event)
             rail = player.selected
         end
         if rail == nil then return end
-        local train = storage.data["players"][player.index]["shuttle"]
+        local train = datamanager.getShuttle(player)
         if(train == nil) then return end
         local locomotive = datamanager.getLocomotive(train)
         if locomotive.color == nil then trainColor = "red"
