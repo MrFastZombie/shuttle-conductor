@@ -173,8 +173,6 @@ script.on_event(defines.events.on_train_changed_state, function (event)
     end
 end)
 
-script.on_event(defines.events.on_gui_)
-
 script.on_event("shuttle-conductor-summon", function(event)
     if event.selected_prototype then
         local player = game.get_player(event.player_index)
