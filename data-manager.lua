@@ -4,10 +4,11 @@ local datamanager = {}
 ---Ensures the basic data structures exist.
 function datamanager.initData()
     storage.data = storage.data or {}
-    if not storage.data["shuttles"] then storage.data["shuttles"] = {} end --Probably not needed.
+    if not storage.data["shuttles"] then storage.data["shuttles"] = {} end --Data schema: shuttles -> force? -> surface?
     if not storage.data["depots"] then storage.data["depots"] = {} end --Also likely not needed.
     if not storage.data["players"] then storage.data["players"] = {} end
     if not storage.data["stations"] then storage.data["stations"] = {} end --Data schema: stations -> force -> surface
+    if not storage.data["backernames"] then storage.data["backernames"] = {} end
 end
 
 ---find all the stations that a player can access.
@@ -72,6 +73,49 @@ end
 function datamanager.getShuttle(player)
     if storage.data["players"][player.index]["shuttle"] == nil then return nil end
     return storage.data["players"][player.index]["shuttle"]
+end
+
+---Gets a list of all the currently set names of Shuttle depots.
+---@return table|nil
+function datamanager.getDepots()
+    if storage.data["groups"] == nil then return nil end
+    return storage.data["groups"]
+end
+
+---Checks if a shuttle is still valid.
+---@param train LuaTrain
+---@return boolean
+function datamanager.isShuttleValid(train)
+    if train.valid == nil then return false end
+    return train.valid
+end
+
+---Checks if a train is a shuttle.
+---@param train LuaTrain
+---@return boolean
+function datamanager.isShuttle(train)
+    local id = train.id
+    local shuttles = storage.data["shuttles"]
+    return true --TODO: Implement
+end
+
+---Migrates a shuttle when it is modified. (Actually just deselects it for now).
+---@param train LuaTrain
+function datamanager.migrateShuttle(train, oldID)
+    local force = train.carriages[1].force_index
+    for i, player in pairs(storage.data.players) do
+        if player.shuttle ~= nil then
+            if player.shuttle.valid == false then
+                player.shuttle = nil
+                local luaPlayer = game.get_player(i)
+                if luaPlayer ~= nil then luaPlayer.print("[Shuttle Conductor] Your shuttle has been destroyed or modified and has been deselected.") end
+            end
+        end
+    end
+end
+
+function datamanager.getTrainByID(id)
+    return game.train_manager.get_train_by_id(id)
 end
 
 return datamanager

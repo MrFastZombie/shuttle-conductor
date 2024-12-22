@@ -56,9 +56,7 @@ function dispatch.returnToDepot(train)
     train.manual_mode = false
 end
 
---[[ function dispatch.getTrainByID(id)
-
-end
+--[[
 
 script.on_event(defines.events.on_train_changed_state, function(event)
     local train = event.train

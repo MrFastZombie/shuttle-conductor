@@ -83,7 +83,10 @@ function gui.createShuttlePicker(player)
               listPane.style.vertically_squashable = true
               listPane.style.vertically_stretchable = true
               listPane.style.maximal_height = 443
+        
+        gui.createShuttleList(player)
         local train = datamanager.getShuttle(player)
+        if train == nil then return end
         gui.createShuttleView(player, train)
     end
 end
@@ -92,12 +95,60 @@ end
 ---@param player LuaPlayer
 ---@param train LuaTrain
 function gui.createShuttleEntry(player, train)
-    if player.gui.screen["shuttle-conductor-frame"] then 
+    if player.gui.screen["shuttle-conductor-frame"] then
+        local selected = datamanager.getShuttle(player).id
+        local carriageCount = {}
+        local countString = ""
+
+        for i, v in pairs(train.carriages) do
+            if carriageCount[v.name] ~= nil then carriageCount[v.name] = carriageCount[v.name] + 1 end
+            if carriageCount[v.name] == nil then carriageCount[v.name] = 1 end
+        end
+
+        for i, v in pairs(carriageCount) do
+            countString = countString.." "..v.."x ".."[img=entity."..i.."]"
+        end
+
         local frame = player.gui.screen["shuttle-conductor-frame"]["picker-vflow"]["picker-frame"]["pickerDeepFrame"]["list-pane"]
-        local entryFlow = frame.add{type="flow", direction="horizontal"}
-        local camera = entryFlow.add{type="camera", position=train.carriages[1].position, style="shuttle-conductor-shuttle-cam"}
-              camera.entity=train.carriages[1]
-              camera.zoom = 0.2
+        local sFrame = frame.add{type ="frame", name="shuttle-conductor-shuttle-frame-"..train.id}
+              sFrame.style.horizontally_stretchable = true
+        local entryVFlow = sFrame.add{type="flow", direction="vertical", name="shuttle-conductor-entry-vflow-"..train.id}
+        local labelFlow = entryVFlow.add{type="flow", direction="horizontal", name="shuttle-conductor-label-flow-"..train.id}
+        local status = labelFlow.add{type="label", caption="[img=utility/check_mark_green]", name="shuttle-conductor-status-"..train.id}
+        local label = labelFlow.add{type="label", caption="Shuttle "..train.id, name="shuttle-conductor-label-"..train.id}
+        local entryHFlow = entryVFlow.add{type="flow", direction="horizontal", name="shuttle-conductor-entry-hflow-"..train.id}
+        local radio = entryHFlow.add{type="radiobutton", state=false, name="shuttle-conductor-radio-"..train.id}
+        local counts = entryHFlow.add{type="label", caption=countString, name="shuttle-conductor-count-"..train.id}
+        --local target = entryHFlow.add{type="label", caption="Target: "..train.schedule.records[train.schedule.current].station}
+
+        if(train.id == selected) then radio.state = true end
+    end
+end
+
+---Deselects a shuttle in the shuttle picker list.
+---@param sFrame LuaGuiElement
+function deselectShuttle(sFrame)
+    local radio = nil
+    for i, v in pairs(sFrame.children[1].children) do
+        if string.find(v.name, "shuttle%-conductor%-entry%-hflow-") then
+            for j, t in pairs(v.children) do
+                if string.find(t.name, "shuttle%-conductor%-radio%-") then
+                    radio = t
+                end
+            end
+        end
+    end
+    if radio ~= nil then radio.state = false end
+end
+
+function gui.createShuttleList(player)
+    local depots = datamanager.getDepots()
+        if depots == nil then return end
+    for i, v in pairs(depots) do
+        local shuttles = datamanager.getShuttles(player, v)
+        for j, v2 in pairs(shuttles) do
+            gui.createShuttleEntry(player, v2)
+        end
     end
 end
 
@@ -109,6 +160,7 @@ end
 ---@param player LuaPlayer
 ---@param train LuaTrain
 function gui.createShuttleView(player, train)
+    if train.valid == false then return end
     gui.destroyShuttleView(player)
     local pickerFlow = player.gui.screen["shuttle-conductor-frame"]["picker-vflow"]
     local shuttleViewFrame = pickerFlow.add{type="frame", name="shuttle-conductor-shuttleview-frame", style="inside_shallow_frame"}
@@ -193,6 +245,7 @@ local function split_with_comma(str)
     end
     return fields
  end
+--End of gist
 
 local function isFiltered(name)
     local depots = settings.global["shuttle-conductor-depots"].value
@@ -286,6 +339,29 @@ function gui.onClick(event)
             gui.createShuttlePicker(player)
         end
         return
+    end
+end
+
+---Handles checked state change events for the GUI.
+---@param event EventData.on_gui_checked_state_changed
+function gui.onCheckedStateChange(event)
+    if(string.find(event.element.name, "shuttle%-conductor%-radio-")) then
+        local player = game.get_player(event.player_index)
+        if player == nil then return end
+        local frame = player.gui.screen["shuttle-conductor-frame"]["picker-vflow"]["picker-frame"]["pickerDeepFrame"]["list-pane"]
+        if frame == nil then return end
+        local id = string.gsub(event.element.name, "shuttle%-conductor%-[a-z-]*", "")
+        local train = datamanager.getTrainByID(id)
+        if train == nil then return end
+        for i, v in pairs(frame.children) do
+            if string.find(v.name, "shuttle%-conductor%-shuttle%-frame-") then
+                if(v.name ~= "shuttle-conductor-shuttle-frame-"..id) then
+                    deselectShuttle(v)
+                    datamanager.setShuttle(player, train)
+                    gui.createShuttleView(player, train)
+                end
+            end
+        end
     end
 end
 

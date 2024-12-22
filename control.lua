@@ -158,6 +158,10 @@ script.on_event(defines.events.on_gui_click, function(event)
     gui.onClick(event)
 end)
 
+script.on_event(defines.events.on_gui_checked_state_changed, function(event)
+    gui.onCheckedStateChange(event)
+end)
+
 script.on_event(defines.events.on_gui_text_changed, function(event)
     if event.element.name == "shuttle-conductor-textfield" then
         gui.onSearch(event)
@@ -170,6 +174,17 @@ end)
 script.on_event(defines.events.on_train_changed_state, function (event)
     if event.train.state == defines.train_state.wait_station then
         log("train changed state!")
+    end
+end)
+
+script.on_event(defines.events.on_train_created, function (event)
+    if datamanager.isShuttle(event.train) then
+        if event.old_train_id_1 == nil then log("[Shuttle Conductor] Detected a train migration event could not find old_train_id_1.")
+        elseif event.train == nil then log("[Shuttle Conductor] Detected a train migration event but could not find a train.")
+        else
+            log("[Shuttle Conductor] Migrating shuttle from ID "..event.old_train_id_1.." to ID "..event.train.id)
+            datamanager.migrateShuttle(event.train, event.old_train_id_1)
+        end
     end
 end)
 
