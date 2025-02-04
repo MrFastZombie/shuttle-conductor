@@ -47,7 +47,7 @@ jobs:
           mv $(ls --ignore=${{env.MOD_NAME}}) ./${{env.MOD_NAME}}
 
       - name: 'Upload Artifact'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: "${{env.MOD_NAME}}_${{env.LATEST}}"
           path: |
